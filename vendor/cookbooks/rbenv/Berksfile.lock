@@ -1,0 +1,6 @@
+cookbook 'rbenv', :path => '/Users/reset/code/riot-cookbooks/rbenv'
+cookbook 'runit', :locked_version => '0.15.0'
+cookbook 'yum', :locked_version => '0.6.2'
+cookbook 'dmg', :locked_version => '1.0.0'
+cookbook 'git', :locked_version => '1.0.0'
+cookbook 'ohai', :locked_version => '1.0.2'

@@ -1,4 +1,4 @@
-require 'berkshelf/vagrant'
+#require 'berkshelf/vagrant'
 
 Vagrant::Config.run do |config|
   config.vm.host_name = "myroku-server"
@@ -8,7 +8,7 @@ Vagrant::Config.run do |config|
   config.vm.customize ["modifyvm", :id, "--memory", 512]
   config.vm.customize ["modifyvm", :id, "--cpus", 4]
   config.vm.provision :chef_solo do |chef|
-    chef.cookbooks_path = ["cookbooks"]
+    chef.cookbooks_path = ["cookbooks", "vendor/cookbooks"]
     chef.roles_path = "roles"
     chef.add_role("myroku_app")
     chef.add_role("myroku_db")
