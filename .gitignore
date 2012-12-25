@@ -5,3 +5,5 @@
 \#*#
 .*.sw[a-z]
 *.un~
+.bundle/
+vendor/bundle/
