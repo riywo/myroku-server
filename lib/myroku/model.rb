@@ -12,6 +12,7 @@ module Model
 class Application < ActiveRecord::Base
   has_one :app_server, :autosave => true
   has_one :db_server,  :autosave => true
+  @@ga_repo = Gitolite::GitoliteAdmin.new(File.expand_path("../../../../gitolite-admin", __FILE__))
 
   def initialize(attributes = nil, options = {})
     name = attributes[:name]
@@ -20,6 +21,11 @@ class Application < ActiveRecord::Base
 
     build_app_server(:name => name)
     build_db_server(:name => name)
+
+    repo = Gitolite::Config::Repo.new(name)
+    repo.add_permission("RW+", "", "@all")
+    @@ga_repo.config.add_repo(repo)
+    @@ga_repo.save_and_apply
   end
 end
 
