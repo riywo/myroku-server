@@ -11,15 +11,18 @@ include_recipe 'myroku::ruby'
 myroku_user = node['myroku']['app']['username']
 myroku_home = "#{node['user']['home_root']}/#{myroku_user}"
 
-node.set['gitolite2']['public_key_path'] = "#{myroku_home}/.ssh/id_dsa.pub"
+node.set['gitolite2']['public_key_path'] = "#{myroku_home}/.ssh/id_rsa.pub"
 include_recipe "gitolite2"
 
-execute "add localhost to known_hosts" do
-  user myroku_user
-  group myroku_user
-  cwd myroku_home
-  command "ssh-keyscan localhost >> #{myroku_home}/.ssh/known_hosts"
-  not_if "grep -q \"`ssh-keyscan localhost`\" #{myroku_home}/.ssh/known_hosts"
+servers = (node['myroku']['servers']['app'] + node['myroku']['servers']['proxy'] + node['myroku']['servers']['db']).uniq
+servers.each do |server|
+  execute "add #{server} to known_hosts" do
+    user myroku_user
+    group myroku_user
+    cwd myroku_home
+    command "ssh-keyscan #{server} >> #{myroku_home}/.ssh/known_hosts"
+    not_if "grep -q \"`ssh-keyscan #{server}`\" #{myroku_home}/.ssh/known_hosts"
+  end
 end
 
 execute "gitconfig user" do

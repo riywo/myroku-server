@@ -1,5 +1,12 @@
 #require 'berkshelf/vagrant'
 
+unless File.exists? "./.ssh/id_rsa"
+  system "mkdir -p .ssh"
+  system "ssh-keygen -t rsa -f .ssh/id_rsa -N '' -C 'created by vagrant'"
+end
+ssh_private_key = File.read "./.ssh/id_rsa".chomp
+ssh_public_key  = File.read "./.ssh/id_rsa.pub".chomp
+
 Vagrant::Config.run do |config|
   config.vm.host_name = "myroku-server"
   config.vm.box = "precise64"
@@ -21,6 +28,10 @@ Vagrant::Config.run do |config|
         :server_repl_password   => 'replpass'
       },
       :myroku => {
+        :ssh => {
+          :private_key => ssh_private_key,
+          :public_key  => ssh_public_key,
+        },
         :servers => {
           :app   => ['localhost'],
           :proxy => ['localhost'],

@@ -105,9 +105,7 @@ unless node['gitolite2']['public_key'].nil?
     action :create
   end
 else
-  execute "cp #{node['gitolite2']['public_key_path']} #{key_file}" do
-    creates key_file
-  end
+  execute "cp #{node['gitolite2']['public_key_path']} #{key_file}"
   file key_file do
     owner node['gitolite2']['user']
     group node['gitolite2']['group']
