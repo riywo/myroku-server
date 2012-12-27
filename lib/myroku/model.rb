@@ -2,6 +2,7 @@
 require 'active_record'
 require 'myroku/config'
 require 'gitolite'
+require 'grit'
 
 ActiveRecord::Base.establish_connection(Myroku::Config.new.load['database'])
 ActiveRecord::Migrator.up('db/migrate')
@@ -12,7 +13,7 @@ module Model
 class Application < ActiveRecord::Base
   has_one :app_server, :autosave => true
   has_one :db_server,  :autosave => true
-  @@ga_repo = Gitolite::GitoliteAdmin.new(File.expand_path("../../../../gitolite-admin", __FILE__))
+
 
   def initialize(attributes = nil, options = {})
     name = attributes[:name]
@@ -24,8 +25,46 @@ class Application < ActiveRecord::Base
 
     repo = Gitolite::Config::Repo.new(name)
     repo.add_permission("RW+", "", "@all")
-    @@ga_repo.config.add_repo(repo)
-    @@ga_repo.save_and_apply
+    ga_repo.config.add_repo(repo)
+    ga_repo.save_and_apply
+
+    git_repo
+  end
+
+  def ga_repo
+    @ga_repo ||= Gitolite::GitoliteAdmin.new(File.expand_path("../../../../gitolite-admin", __FILE__))
+    @ga_repo
+  end
+
+  def config
+    @config ||= Myroku::Config.new.load
+    @config
+  end
+
+  def git_repo
+    path = File.expand_path("../../../../build-app/#{name}", __FILE__)
+    unless File.exists? path
+      system("git clone #{git_url_internal} #{path} > /dev/null 2>&1")
+    end
+    @git_repo ||= Grit::Repo.new(path)
+    @git_repo
+  end
+
+  def fqdn
+    subdomain + '.' + config['common']['app_domain']
+  end
+
+  def url
+    "http://#{fqdn}"
+  end
+
+  def git_url
+    admin_domain = config['common']['admin_domain']
+    "git@#{admin_domain}:#{name}"
+  end
+
+  def git_url_internal
+    "git@localhost:#{name}"
   end
 end
 

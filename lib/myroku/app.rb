@@ -5,6 +5,8 @@ require 'myroku/model'
 module Myroku
 
 class App < Sinatra::Base
+  set :myroku, Myroku::Config.new.load
+
   get '/' do
     {
       :user => Model::User.all,
@@ -14,8 +16,21 @@ class App < Sinatra::Base
     }.to_json
   end
 
+  get '/application/:id' do
+    app = Model::Application.find(params[:id])
+    {
+      :name    => app.name,
+      :url     => app.url,
+      :git => {
+        :url      => app.git_url,
+        :revision => app.revision,
+      },
+    }.to_json
+  end
+
   post '/application' do
-    Model::Application.create(params).to_json
+    app = Model::Application.create(params)
+    redirect to("/application/#{app.id}")
   end
 
   post '/user' do
