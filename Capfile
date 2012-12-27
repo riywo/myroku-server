@@ -4,3 +4,4 @@ require 'myroku/config'
 servers = Myroku::Config.new.load['servers']
 role :app,   *servers['app']
 role :proxy, *servers['proxy']
+role :db,    *servers['db']
