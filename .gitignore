@@ -7,3 +7,4 @@
 *.un~
 .bundle/
 vendor/bundle/
+config/*.yml
