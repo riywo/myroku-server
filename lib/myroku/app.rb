@@ -1,11 +1,15 @@
 require 'sinatra/base'
 require 'myroku/config'
 require 'myroku/model'
+require 'myroku/resque'
 
 module Myroku
 
 class App < Sinatra::Base
-  set :myroku, Myroku::Config.new.load
+  configure do
+    config = Myroku::Config.new
+    set :config, config
+  end
 
   get '/' do
     {

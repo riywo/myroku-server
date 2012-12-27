@@ -4,7 +4,7 @@ require 'myroku/config'
 require 'gitolite'
 require 'grit'
 
-ActiveRecord::Base.establish_connection(Myroku::Config.new.load['database'])
+ActiveRecord::Base.establish_connection(Myroku::Config.new.database['mysql'])
 ActiveRecord::Migrator.up('db/migrate')
 
 module Myroku
@@ -36,7 +36,7 @@ class Application < ActiveRecord::Base
   end
 
   def config
-    @config ||= Myroku::Config.new.load
+    @config ||= Myroku::Config.new
     @config
   end
 
@@ -50,7 +50,7 @@ class Application < ActiveRecord::Base
   end
 
   def fqdn
-    subdomain + '.' + config['common']['app_domain']
+    subdomain + '.' + config.common['app_domain']
   end
 
   def url
@@ -58,7 +58,7 @@ class Application < ActiveRecord::Base
   end
 
   def git_url
-    admin_domain = config['common']['admin_domain']
+    admin_domain = config.common['admin_domain']
     "git@#{admin_domain}:#{name}"
   end
 
@@ -71,7 +71,7 @@ class AppServer < ActiveRecord::Base
   belongs_to :applications
 
   def initialize(attributes = nil, options = {})
-    host = Myroku::Config.new.load['servers']['app'].sample
+    host = Myroku::Config.servers['app'].sample
     port = free_port(host)
     super({:host => host, :port => port}, options)
   end
@@ -90,7 +90,7 @@ class DbServer < ActiveRecord::Base
   belongs_to :applications
 
   def initialize(attributes = nil, options = {})
-    host = Myroku::Config.new.load['servers']['db'].sample
+    host = Myroku::Config.new.servers['db'].sample
     mysql_db = escape_mysql_db(attributes[:name])
     mongo_db = escape_mongo_db(attributes[:name])
     redis_db = define_redis_db(attributes[:name])

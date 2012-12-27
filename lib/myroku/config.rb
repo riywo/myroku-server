@@ -8,17 +8,31 @@ class Config
     @config_dir = config_dir
   end
 
-  def load
-    config = {}
-    Dir.glob("#{@config_dir}/*.yml").each do |conf_file|
-      key = File::basename(conf_file, '.yml')
-      setting = YAML.load_file(conf_file)
-      config[key] = setting
-    end
-    config
+  def method_missing(key)
+    config[key.to_s]
+  end
+
+  def redis_url
+    conf = database['redis']
+    url = "redis://#{conf['host']}"
+    url = url + ":#{conf['port']}"
+    url = url + "/#{conf['db']}"
+    url
   end
 
   private
+
+  def config
+    if @config.nil?
+      @config = {}
+      Dir.glob("#{@config_dir}/*.yml").each do |conf_file|
+        key = File::basename(conf_file, '.yml')
+        setting = YAML.load_file(conf_file)
+        @config[key] = setting
+      end
+    end
+    @config
+  end
 
 end
 
