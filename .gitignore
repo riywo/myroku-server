@@ -9,3 +9,5 @@
 vendor/bundle/
 config/*.yml
 .ssh/
+.build-app/*
+!.gitkeep

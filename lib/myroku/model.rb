@@ -14,7 +14,6 @@ class Application < ActiveRecord::Base
   has_one :app_server, :autosave => true
   has_one :db_server,  :autosave => true
 
-
   def initialize(attributes = nil, options = {})
     name = attributes[:name]
     subdomain = name
@@ -42,7 +41,7 @@ class Application < ActiveRecord::Base
   end
 
   def git_repo
-    path = File.expand_path("../../../../build-app/#{name}", __FILE__)
+    path = File.expand_path("../../../.build-app/#{name}", __FILE__)
     unless File.exists? path
       system("git clone #{git_url_internal} #{path} > /dev/null 2>&1")
     end
