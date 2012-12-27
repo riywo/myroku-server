@@ -21,3 +21,5 @@ end
 package "dstat" do
   action :install
 end
+
+include_recipe 'myroku::user'
