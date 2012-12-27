@@ -2,13 +2,15 @@ class Init < ActiveRecord::Migration
   def self.up
 
     create_table :applications do |t|
-      t.string  :name,     :null => false
-      t.integer :port,     :null => false
-      t.string  :revision, :null => false
+      t.string  :name,       :null => false
+      t.string  :revision,   :null => false
+      t.string  :app_server, :null => false
+      t.integer :app_port,   :null => false
+      t.string  :db_server,  :null => false
       t.timestamps
     end
     add_index  :applications, :name, :unique => true
-    add_index  :applications, :port, :unique => true
+    add_index  :applications, [:app_server, :app_port], :unique => true
 
     create_table :users do |t|
       t.string  :email,    :null => false
