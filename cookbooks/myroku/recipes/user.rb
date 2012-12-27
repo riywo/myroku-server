@@ -7,7 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 include_recipe "user"
-myroku_user = node['myroku']['app']['username']
+myroku_user = node['myroku']['username']
 myroku_home = "#{node['user']['home_root']}/#{myroku_user}"
 
 user_account myroku_user do

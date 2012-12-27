@@ -8,7 +8,7 @@
 #
 include_recipe 'myroku::ruby'
 
-myroku_user = node['myroku']['app']['username']
+myroku_user = node['myroku']['username']
 myroku_home = "#{node['user']['home_root']}/#{myroku_user}"
 
 node.set['gitolite2']['public_key_path'] = "#{myroku_home}/.ssh/id_rsa.pub"

@@ -2,7 +2,7 @@ site :opscode
 
 cookbook 'nginx'
 cookbook 'mysql'
-cookbook 'redis2'
+cookbook 'redisio'
 cookbook 'apt'
 cookbook 'rbenv'
 cookbook 'user'

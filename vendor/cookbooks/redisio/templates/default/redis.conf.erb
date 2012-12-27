@@ -1,5 +1,4 @@
-<% def critical(val); raise RuntimeError unless val; val; end %>
-# Redis configuration file template
+# Redis configuration file example
 
 # Note on units: when memory size is needed, it is possible to specifiy
 # it in the usual form of 1k 5GB 4M and so forth:
@@ -15,35 +14,30 @@
 
 # By default Redis does not run as a daemon. Use 'yes' if you need it.
 # Note that Redis will write a pid file in /var/run/redis.pid when daemonized.
-daemonize no
+daemonize yes
 
 # When running daemonized, Redis writes a pid file in /var/run/redis.pid by
 # default. You can specify a custom pid file location here.
-pidfile /var/run/redis/<%= @instance_name %>.pid
+pidfile <%= @piddir %>/redis_<%=@port%>.pid
 
 # Accept connections on the specified port, default is 6379.
 # If port 0 is specified Redis will not listen on a TCP socket.
-port <%= @conf["port"] %>
+port <%=@port%>
 
 # If you want you can bind a single interface, if the bind option is not
 # specified all the interfaces will listen for incoming connections.
 #
 # bind 127.0.0.1
-<% if @conf.has_key? :bindaddress %>
-bind <%= @conf["bindaddress"] %>
-<% end %>
+<%= "bind #{@address}" unless @address.nil? %>
 
 # Specify the path for the unix socket that will be used to listen for
 # incoming connections. There is no default, so Redis will not listen
 # on a unix socket when not specified.
 #
 # unixsocket /tmp/redis.sock
-<% if @conf.has_key? :socket %>
-unixsocket <%= @conf["socket"] %>
-<% end %>
-
+# unixsocketperm 755
 # Close the connection after a client is idle for N seconds (0 to disable)
-timeout <%= @conf["timeout"] %>
+<%= "timeout #{@timeout}" %>
 
 # Set server verbosity to 'debug'
 # it can be one of:
@@ -51,27 +45,29 @@ timeout <%= @conf["timeout"] %>
 # verbose (many rarely useful info, but not a mess like the debug level)
 # notice (moderately verbose, what you want in production probably)
 # warning (only very important / critical messages are logged)
-loglevel notice
+loglevel <%=@loglevel%>
 
 # Specify the log file name. Also 'stdout' can be used to force
 # Redis to log on the standard output. Note that if you use standard
 # output for logging but daemonize, logs will be sent to /dev/null
-logfile <%= ::File.join(node["redis2"]["log_dir"], "redis_#{@instance_name}.log") %>
+#
+# logfile stdout
+<%= "logfile #{@logfile}" unless @logfile.nil? %>
 
 # To enable logging to the system logger, just set 'syslog-enabled' to yes,
 # and optionally update the other syslog parameters to suit your needs.
-syslog-enabled yes
+syslog-enabled <%= "#{@syslogenabled}" %>
 
 # Specify the syslog identity.
-syslog-ident redis
+syslog-ident redis-<%=@port%>
 
 # Specify the syslog facility.  Must be USER or between LOCAL0-LOCAL7.
-syslog-facility USER
+syslog-facility <%= "#{@syslogfacility}" %>
 
 # Set the number of databases. The default database is DB 0, you can select
 # a different one on a per-connection basis using SELECT <dbid> where
 # dbid is a number between 0 and 'databases'-1
-databases <%= @conf["databases"] %>
+databases <%=@databases%>
 
 ################################ SNAPSHOTTING  #################################
 #
@@ -89,11 +85,14 @@ databases <%= @conf["databases"] %>
 #
 #   Note: you can disable saving at all commenting all the "save" lines.
 
-<% if @conf["bgsave"] %>
-save 900 1
-save 300 10
-save 60 10000
-<% end %>
+#save 900 1
+#save 300 10
+#save 60 10000
+
+<% if (@backuptype == 'rdb' || @backuptype == 'both') %>
+  <% @save.each do |save_option| %>
+    <%= "save #{save_option}" %>
+  <% end %>
 
 # Compress string objects using LZF when dump .rdb databases?
 # For default that's set to 'yes' as it's almost always a win.
@@ -102,7 +101,8 @@ save 60 10000
 rdbcompression yes
 
 # The filename where to dump the DB
-dbfilename <%= @conf["dumpdb_filename"] %>
+dbfilename dump-<%=@port%>.rdb
+<%end%>
 
 # The working directory.
 #
@@ -112,9 +112,8 @@ dbfilename <%= @conf["dumpdb_filename"] %>
 # Also the Append Only File will be created inside this directory.
 # 
 # Note that you must specify a directory here, not a file name.
-dir <%= @conf["data_dir"] %>
+dir <%=@datadir%>
 
-<% if @master.is_a? ::Chef::Node %>
 ################################# REPLICATION #################################
 
 # Master-Slave replication. Use slaveof to make a Redis instance a copy of
@@ -122,16 +121,16 @@ dir <%= @conf["data_dir"] %>
 # so for example it is possible to configure the slave to save the DB with a
 # different interval, or to listen to another port, and so on.
 #
-slaveof <%= @master["ipaddress"] %> <%= critical @master["redis2"]["instances"][@instance_name]["port"] %>
+# slaveof <ip> <port>
+<%= "slaveof #{@slaveof['address']} #{@slaveof['port']}" unless @slaveof.nil? %>
 
 # If the master is password protected (using the "requirepass" configuration
 # directive below) it is possible to tell the slave to authenticate before
 # starting the replication synchronization process, otherwise the master will
 # refuse the slave request.
 #
-<% if @master["redis2"]["requirepass"] %>
-masterauth <%= @master["redis2"]["requirepass"] %>
-<% end %>
+# masterauth <master-password>
+<%= "masterauth #{@masterauth}" unless @masterauth.nil? %> 
 
 # When a slave lost the connection with the master, or when the replication
 # is still in progress, the slave can act in two different ways:
@@ -144,8 +143,22 @@ masterauth <%= @master["redis2"]["requirepass"] %>
 #    an error "SYNC with master in progress" to all the kind of commands
 #    but to INFO and SLAVEOF.
 #
-slave-serve-stale-data yes
-<% end %>
+slave-serve-stale-data <%=@slaveservestaledata%>
+
+# Slaves send PINGs to server in a predefined interval. It's possible to change
+# this interval with the repl_ping_slave_period option. The default value is 10
+# seconds.
+#
+repl-ping-slave-period <%=@replpingslaveperiod%>
+
+# The following option sets a timeout for both Bulk transfer I/O timeout and
+# master data or ping response timeout. The default value is 60 seconds.
+#
+# It is important to make sure that this value is greater than the value
+# specified for repl-ping-slave-period otherwise a timeout will be detected
+# every time there is low traffic between the master and the slave.
+#
+repl-timeout <%=@repltimeout%>
 
 ################################## SECURITY ###################################
 
@@ -160,13 +173,12 @@ slave-serve-stale-data yes
 # 150k passwords per second against a good box. This means that you should
 # use a very strong password otherwise it will be very easy to break.
 #
-<% if @conf["requirepass"] %>
-requirepass <% @conf["requirepass"] %>
-<% end %>
+# requirepass foobared
+<%= "requirepass #{@requirepass}" unless @requirepass.nil? %>
 
 # Command renaming.
 #
-# It is possible to change the name of dangerous commands in a shared
+# It is possilbe to change the name of dangerous commands in a shared
 # environment. For instance the CONFIG command may be renamed into something
 # of hard to guess so that it will be still available for internal-use
 # tools but not available for general clients.
@@ -188,25 +200,33 @@ requirepass <% @conf["requirepass"] %>
 # Once the limit is reached Redis will close all the new connections sending
 # an error 'max number of clients reached'.
 #
-<% if @conf["maxclients"] %>maxclients <%= node["redis2"]["maxclients"] %><% end %>
+<%= "maxclients #{@maxclients}" %>
 
 # Don't use more memory than the specified amount of bytes.
-# When the memory limit is reached Redis will try to remove keys with an
-# EXPIRE set. It will try to start freeing keys that are going to expire
-# in little time and preserve keys with a longer time to live.
-# Redis will also try to remove objects from free lists if possible.
+# When the memory limit is reached Redis will try to remove keys
+# accordingly to the eviction policy selected (see maxmemmory-policy).
 #
-# If all this fails, Redis will start to reply with errors to commands
-# that will use more memory, like SET, LPUSH, and so on, and will continue
-# to reply to most read-only commands like GET.
+# If Redis can't remove keys according to the policy, or if the policy is
+# set to 'noeviction', Redis will start to reply with errors to commands
+# that would use more memory, like SET, LPUSH, and so on, and will continue
+# to reply to read-only commands like GET.
 #
-# WARNING: maxmemory can be a good idea mainly if you want to use Redis as a
-# 'state' server or cache, not as a real DB. When Redis is used as a real
-# database the memory usage will grow over the weeks, it will be obvious if
-# it is going to use too much memory in the long run, and you'll have the time
-# to upgrade. With maxmemory after the limit is reached you'll start to get
-# errors for write operations, and this may even lead to DB inconsistency.
+# This option is usually useful when using Redis as an LRU cache, or to set
+# an hard memory limit for an instance (using the 'noeviction' policy).
 #
+# WARNING: If you have slaves attached to an instance with maxmemory on,
+# the size of the output buffers needed to feed the slaves are subtracted
+# from the used memory count, so that network problems / resyncs will
+# not trigger a loop where keys are evicted, and in turn the output
+# buffer of slaves is full with DELs of keys evicted triggering the deletion
+# of more keys, and so forth until the database is completely emptied.
+#
+# In short... if you have slaves attached it is suggested that you set a lower
+# limit for maxmemory so that there is some free RAM on the system for slave
+# output buffers (but this is not needed if the policy is 'noeviction').
+#
+#maxmemory <bytes>
+<%= "maxmemory #{@maxmemory}" unless @maxmemory.nil? %>
 
 # MAXMEMORY POLICY: how Redis will select what to remove when maxmemory
 # is reached? You can select among five behavior:
@@ -227,8 +247,10 @@ requirepass <% @conf["requirepass"] %>
 #       zunionstore zinterstore hset hsetnx hmset hincrby incrby decrby
 #       getset mset msetnx exec sort
 #
-# The default is: volatile-lru
+# The default is:
 #
+# maxmemory-policy volatile-lru
+<%= "maxmemory-policy #{@maxmemorypolicy}" unless @maxmemorypolicy.nil? %>
 
 # LRU and minimal TTL algorithms are not precise algorithms but approximated
 # algorithms (in order to save memory), so you can select as well the sample
@@ -237,11 +259,7 @@ requirepass <% @conf["requirepass"] %>
 # using the following configuration directive.
 #
 # maxmemory-samples 3
-<% if @conf["maxmemory"] %>
-maxmemory <%= @conf["maxmemory"] %>
-maxmemory-policy <%= @conf["maxmemory_policy"] %>
-maxmemory-samples <%= @conf["maxmemory_samples"] %>
-<% end %>
+maxmemory-samples <%=@maxmemorysamples%>
 
 ############################## APPEND ONLY MODE ###############################
 
@@ -261,10 +279,13 @@ maxmemory-samples <%= @conf["maxmemory_samples"] %>
 # IMPORTANT: Check the BGREWRITEAOF to check how to rewrite the append
 # log file in background when it gets too big.
 
-appendonly <%= @conf["appendonly"] %>
-
+<%if (@backuptype == 'aof' || @backuptype == 'both')%>
+appendonly yes
+<%else%> 
+appendonly no
+<%end%>
 # The name of the append only file (default: "appendonly.aof")
-# appendfilename appendonly.aof
+appendfilename appendonly-<%=@port%>.aof
 
 # The fsync() call tells the Operating System to actually write data on disk
 # instead to wait for more data in the output buffer. Some OS will really flush 
@@ -286,7 +307,10 @@ appendonly <%= @conf["appendonly"] %>
 #
 # If unsure, use "everysec".
 
-appendfsync <%= @conf["appendfsync"] %>
+# appendfsync always
+# appendfsync everysec
+# appendfsync no
+<%= "appendfsync #{@appendfsync}" %>
 
 # When the AOF fsync policy is set to always or everysec, and a background
 # saving process (a background save or AOF log background rewriting) is
@@ -306,9 +330,57 @@ appendfsync <%= @conf["appendfsync"] %>
 # 
 # If you have latency problems turn this to "yes". Otherwise leave it as
 # "no" that is the safest pick from the point of view of durability.
-no-appendfsync-on-rewrite <%= @conf["no_appendfsync_on_rewrite"] %>
+no-appendfsync-on-rewrite <%=@noappendfsynconrewrite%>
 
+# Automatic rewrite of the append only file.
+# Redis is able to automatically rewrite the log file implicitly calling
+# BGREWRITEAOF when the AOF log size will growth by the specified percentage.
+# 
+# This is how it works: Redis remembers the size of the AOF file after the
+# latest rewrite (or if no rewrite happened since the restart, the size of
+# the AOF at startup is used).
+#
+# This base size is compared to the current size. If the current size is
+# bigger than the specified percentage, the rewrite is triggered. Also
+# you need to specify a minimal size for the AOF file to be rewritten, this
+# is useful to avoid rewriting the AOF file even if the percentage increase
+# is reached but it is still pretty small.
+#
+# Specify a precentage of zero in order to disable the automatic AOF
+# rewrite feature.
+
+auto-aof-rewrite-percentage <%=@aofrewritepercentage%>
+auto-aof-rewrite-min-size <%=@aofrewriteminsize%>
+
+################################## SLOW LOG ###################################
+
+# The Redis Slow Log is a system to log queries that exceeded a specified
+# execution time. The execution time does not include the I/O operations
+# like talking with the client, sending the reply and so forth,
+# but just the time needed to actually execute the command (this is the only
+# stage of command execution where the thread is blocked and can not serve
+# other requests in the meantime).
+# 
+# You can configure the slow log with two parameters: one tells Redis
+# what is the execution time, in microseconds, to exceed in order for the
+# command to get logged, and the other parameter is the length of the
+# slow log. When a new command is logged the oldest one is removed from the
+# queue of logged commands.
+
+# The following time is expressed in microseconds, so 1000000 is equivalent
+# to one second. Note that a negative number disables the slow log, while
+# a value of zero forces the logging of every command.
+slowlog-log-slower-than 10000
+
+# There is no limit to this length. Just be aware that it will consume memory.
+# You can reclaim memory used by the slow log with SLOWLOG RESET.
+slowlog-max-len 1024
+
+<% unless @version[:major].to_i == 2 && @version[:minor].to_i >= 5 %> 
 ################################ VIRTUAL MEMORY ###############################
+
+### WARNING! Virtual Memory is deprecated in Redis 2.4
+### The use of Virtual Memory is strongly discouraged.
 
 # Virtual Memory allows Redis to work with datasets bigger than the actual
 # amount of RAM needed to hold the whole dataset in memory.
@@ -319,7 +391,8 @@ no-appendfsync-on-rewrite <%= @conf["no_appendfsync_on_rewrite"] %>
 # To enable VM just set 'vm-enabled' to yes, and set the following three
 # VM parameters accordingly to your needs.
 
-vm-enabled <%= @conf["vm"]["enabled"] %>
+vm-enabled no
+# vm-enabled yes
 
 # This is the path of the Redis swap file. As you can guess, swap files
 # can't be shared by different Redis instances, so make sure to use a swap
@@ -332,7 +405,7 @@ vm-enabled <%= @conf["vm"]["enabled"] %>
 # *** WARNING *** if you are using a shared hosting the default of putting
 # the swap file under /tmp is not secure. Create a dir with access granted
 # only to Redis user and configure Redis to create the swap file there.
-vm-swap-file <%= @conf["vm"]["swap_file"] %>
+vm-swap-file /tmp/redis.swap
 
 # vm-max-memory configures the VM to use at max the specified amount of
 # RAM. Everything that deos not fit will be swapped on disk *if* possible, that
@@ -342,7 +415,7 @@ vm-swap-file <%= @conf["vm"]["swap_file"] %>
 # default, just specify the max amount of RAM you can in bytes, but it's
 # better to leave some margin. For instance specify an amount of RAM
 # that's more or less between 60 and 80% of your free RAM.
-vm-max-memory <%= @conf["vm"]["max_memory"] %>
+vm-max-memory 0
 
 # Redis swap files is split into pages. An object can be saved using multiple
 # contiguous pages, but pages can't be shared between different objects.
@@ -353,7 +426,7 @@ vm-max-memory <%= @conf["vm"]["max_memory"] %>
 # If you use a lot of small objects, use a page size of 64 or 32 bytes.
 # If you use a lot of big objects, use a bigger page size.
 # If unsure, use the default :)
-vm-page-size <%= @conf["vm"]["page_size"] %>
+vm-page-size 32
 
 # Number of total memory pages in the swap file.
 # Given that the page table (a bitmap of free/used pages) is taken in memory,
@@ -366,7 +439,7 @@ vm-page-size <%= @conf["vm"]["page_size"] %>
 #
 # It's better to use the smallest acceptable value for your application,
 # but the default is large in order to work in most conditions.
-vm-pages <%= @conf["vm"]["pages"] %>
+vm-pages 134217728
 
 # Max number of VM I/O threads running at the same time.
 # This threads are used to read/write data from/to swap file, since they
@@ -377,16 +450,25 @@ vm-pages <%= @conf["vm"]["pages"] %>
 #
 # The special value of 0 turn off threaded I/O and enables the blocking
 # Virtual Memory implementation.
-vm-max-threads <%= @conf["vm"]["max_threads"] %>
+vm-max-threads 4
+<% end %>
 
 ############################### ADVANCED CONFIG ###############################
 
-# Hashes are encoded in a special way (much more memory efficient) when they
-# have at max a given numer of elements, and the biggest element does not
-# exceed a given threshold. You can configure this limits with the following
-# configuration directives.
-hash-max-zipmap-entries 512
-hash-max-zipmap-value 64
+# Hashes are encoded using a memory efficient data structure when they have a
+# small number of entries, and the biggest entry does not exceed a given
+# threshold. These thresholds can be configured using the following directives.
+
+<% #Once the first official 2.6 release is out, it would make sense to remove the extraneous :minor 5 comparison %>
+<% if @version[:major].to_i == 2 && (@version[:minor].to_i == 6 || @version[:minor].to_i == 5)  %> 
+  ######## Redis 2.6 ########
+  hash-max-ziplist-entries 512
+  hash-max-ziplist-value 64
+<% elsif @version[:major].to_i == 2 && @version[:minor].to_i == 4 %>
+  ######## Redis 2.4 ########
+  hash-max-zipmap-entries 512
+  hash-max-zipmap-value 64
+<% end %>
 
 # Similarly to hashes, small lists are also encoded in a special way in order
 # to save a lot of space. The special representation is only used when
@@ -400,6 +482,12 @@ list-max-ziplist-value 64
 # The following configuration setting sets the limit in the size of the
 # set in order to use this special memory saving encoding.
 set-max-intset-entries 512
+
+# Similarly to hashes and lists, sorted sets are also specially encoded in
+# order to save a lot of space. This encoding is only used when the length and
+# elements of a sorted set are below the following limits:
+zset-max-ziplist-entries 128
+zset-max-ziplist-value 64
 
 # Active rehashing uses 1 millisecond every 100 milliseconds of CPU time in
 # order to help rehashing the main Redis hash table (the one mapping top-level
@@ -419,7 +507,7 @@ set-max-intset-entries 512
 #
 # use "activerehashing yes" if you don't have such hard requirements but
 # want to free memory asap when possible.
-activerehashing <%= @conf["activerehashing"] %>
+activerehashing yes
 
 ################################## INCLUDES ###################################
 
@@ -430,3 +518,9 @@ activerehashing <%= @conf["activerehashing"] %>
 #
 # include /path/to/local.conf
 # include /path/to/other.conf
+<% unless @includes.nil? %>
+  <% @includes.each do |include_option| %>
+    <%= "include #{include_option}" %>
+  <% end %>
+<% end %>
+

@@ -3,7 +3,8 @@ description "myroku admin"
 run_list [
   "recipe[myroku::base]",
   "recipe[nginx]",
-  "recipe[redis2]",
+  "recipe[redisio::install]",
+  "recipe[redisio::enable]",
   "recipe[mysql::server]",
   "recipe[mysql::client]",
   "recipe[myroku::admin]",
