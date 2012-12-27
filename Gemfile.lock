@@ -36,6 +36,7 @@ GEM
     json (1.5.4)
     log4r (1.1.10)
     mime-types (1.19)
+    moneta (0.6.0)
     multi_json (1.5.0)
     mysql2 (0.3.11)
     net-scp (1.0.4)
@@ -67,6 +68,7 @@ PLATFORMS
 DEPENDENCIES
   activerecord
   gitolite
+  moneta (= 0.6.0)
   mysql2
   sinatra
   vagrant (~> 1.0.5)
