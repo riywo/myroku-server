@@ -22,6 +22,11 @@ Vagrant::Config.run do |config|
     chef.add_role("myroku_app")
     chef.add_role("myroku_db")
     chef.json = {
+      :authorization => {
+        :sudo => {
+          :users => ["vagrant"],
+        },
+      },
       :mysql => {
         :server_root_password   => 'rootpass',
         :server_debian_password => 'debpass',

@@ -28,3 +28,8 @@ file "#{myroku_home}/.ssh/id_rsa.pub" do
   mode  0644
   content node['myroku']['ssh']['public_key']
 end
+
+include_recipe "sudo"
+group "sudo" do
+  members myroku_user
+end
