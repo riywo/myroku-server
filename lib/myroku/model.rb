@@ -64,7 +64,7 @@ class AppServer < ActiveRecord::Base
   belongs_to :applications
 
   def initialize(attributes = nil, options = {})
-    host = Myroku::Config.servers['app'].sample
+    host = Myroku::Config.new.servers['app'].sample
     port = free_port(host)
     super({:host => host, :port => port}, options)
   end
