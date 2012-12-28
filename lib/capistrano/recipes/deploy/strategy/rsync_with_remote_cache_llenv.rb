@@ -26,7 +26,7 @@ module Capistrano
 
         def escape_path
           dir = local_cache_path.split('/').last
-          File.expand_path("../.cache_#{dir}", local_cache_path)
+          "/tmp/myroku/#{dir}_vendor"
         end
 
         def restore_vendorpath
