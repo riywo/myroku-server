@@ -5,6 +5,11 @@ module Capistrano
     module Strategy
       class RsyncWithRemoteCacheLlenv < RsyncWithRemoteCache
 
+        def deploy!
+          super
+          update_remote_llenv
+        end
+
         def update_local_cache
           escape_vendorpath
           super
@@ -16,6 +21,15 @@ module Capistrano
           super.check do |check|
             check.local.command("llenv")
           end
+        end
+
+        def update_remote_llenv
+          finder_options = {:except => { :no_release => true }}
+          find_servers(finder_options).each {|s| system(llenv_rsync_command_for(s)) }
+        end
+
+        def llenv_rsync_command_for(server)
+          "rsync #{rsync_options} --rsh='ssh -p #{ssh_port(server)}' /home/myroku/.llenv/ #{rsync_host(server)}:/home/myroku/.llenv/"
         end
 
         private
