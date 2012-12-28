@@ -22,4 +22,8 @@ package "dstat" do
   action :install
 end
 
+node.set['redisio']['default_settings']['databases'] = 1002
+node.set['authorization']['sudo']['groups'] = ['sudo']
+node.set['authorization']['sudo']['passwordless'] = true
+
 include_recipe 'myroku::user'
