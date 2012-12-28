@@ -34,3 +34,12 @@ server {
     run "#{sudo} /etc/init.d/nginx restart"
   end
 end
+
+namespace :deploy do
+  task :restart do end
+  task :start do end
+  task :stop do end
+  task :cold do end
+  task :migrate do end
+  task :migrations do end
+end

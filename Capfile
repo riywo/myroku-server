@@ -6,4 +6,8 @@ role :app,   *servers['app']
 role :proxy, *servers['proxy']
 role :db,    *servers['db']
 
-load './lib/myroku/task'
+load 'deploy'
+load 'lib/myroku/task'
+
+set :config_root, '.cap'
+require 'capistrano/multiconfig'
