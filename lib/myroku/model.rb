@@ -1,4 +1,3 @@
-#require 'sinatra/activerecord'
 require 'active_record'
 require 'myroku/config'
 require 'gitolite'
@@ -20,7 +19,15 @@ class Application < ActiveRecord::Base
 
     build_app_server(:name => name)
     build_db_server(:name => name)
+  end
 
+  def save
+    super
+    update_ga_repo
+  end
+
+  def update_ga_repo
+    ga_repo.update
     repo = Gitolite::Config::Repo.new(name)
     repo.add_permission("RW+", "", "@all")
     ga_repo.config.add_repo(repo)
@@ -118,6 +125,7 @@ class User < ActiveRecord::Base
     user.pubkey = pubkey.read.chomp
     user.save
 
+    @@ga_repo.update
     key = Gitolite::SSHKey.from_string(user.pubkey, user.email)
     @@ga_repo.add_key key
     @@ga_repo.save_and_apply
