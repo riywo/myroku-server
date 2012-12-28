@@ -65,6 +65,11 @@ class Application < ActiveRecord::Base
   def git_url_internal
     "git@localhost:#{name}"
   end
+
+  def backend_url
+    "http://#{app_server.host}:#{app_server.port}"
+  end
+
 end
 
 class AppServer < ActiveRecord::Base

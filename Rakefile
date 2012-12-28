@@ -7,4 +7,5 @@ require 'myroku/worker'
 
 task "resque:setup" do
   ENV['QUEUE'] = '*'
+  ENV['TERM_CHILD'] = "1"
 end
