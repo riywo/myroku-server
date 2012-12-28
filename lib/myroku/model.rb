@@ -24,6 +24,7 @@ class Application < ActiveRecord::Base
   def save
     super
     update_ga_repo
+    create_cap_file
   end
 
   def update_ga_repo
@@ -32,6 +33,11 @@ class Application < ActiveRecord::Base
     repo.add_permission("RW+", "", "@all")
     ga_repo.config.add_repo(repo)
     ga_repo.save_and_apply
+  end
+
+  def create_cap_file
+    file = File.expand_path("../../../cap/app/#{name}.rb", __FILE__)
+    system("touch #{file}")
   end
 
   def ga_repo
