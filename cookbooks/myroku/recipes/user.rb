@@ -38,3 +38,8 @@ directory "/var/myroku" do
   owner myroku_user
   group myroku_user
 end
+
+directory "/tmp/myroku" do
+  owner myroku_user
+  group myroku_user
+end
