@@ -13,3 +13,5 @@ directory "/var/myroku/app" do
   owner myroku_user
   group myroku_user
 end
+
+include_recipe 'supervisor'
