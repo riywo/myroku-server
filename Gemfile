@@ -8,6 +8,7 @@ gem 'capistrano'
 gem 'capistrano-multiconfig'
 gem 'capistrano_rsync_with_remote_cache'
 gem 'railsless-deploy'
+gem 'ruby-llenv'
 
 gem 'sinatra'
 gem 'activerecord'
