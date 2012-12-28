@@ -9,6 +9,7 @@ gem 'capistrano-multiconfig'
 gem 'capistrano_rsync_with_remote_cache'
 gem 'railsless-deploy'
 gem 'ruby-llenv'
+gem 'foreman'
 
 gem 'sinatra'
 gem 'activerecord'
