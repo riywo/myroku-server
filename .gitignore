@@ -11,3 +11,5 @@ config/*.yml
 .ssh/
 .build-app/*
 !.gitkeep
+.rsync_cache/
+cap/app/*

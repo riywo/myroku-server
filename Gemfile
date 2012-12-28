@@ -6,6 +6,8 @@ gem 'moneta', '= 0.6.0'
 
 gem 'capistrano'
 gem 'capistrano-multiconfig'
+gem 'capistrano_rsync_with_remote_cache'
+gem 'railsless-deploy'
 
 gem 'sinatra'
 gem 'activerecord'
