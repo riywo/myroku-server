@@ -2,7 +2,6 @@
 require 'active_record'
 require 'myroku/config'
 require 'gitolite'
-require 'grit'
 
 ActiveRecord::Base.establish_connection(Myroku::Config.new.database['mysql'])
 ActiveRecord::Migrator.up('db/migrate')
@@ -26,8 +25,6 @@ class Application < ActiveRecord::Base
     repo.add_permission("RW+", "", "@all")
     ga_repo.config.add_repo(repo)
     ga_repo.save_and_apply
-
-    git_repo
   end
 
   def ga_repo
@@ -38,15 +35,6 @@ class Application < ActiveRecord::Base
   def config
     @config ||= Myroku::Config.new
     @config
-  end
-
-  def git_repo
-    path = File.expand_path("../../../.build-app/#{name}", __FILE__)
-    unless File.exists? path
-      system("git clone #{git_url_internal} #{path} > /dev/null 2>&1")
-    end
-    @git_repo ||= Grit::Repo.new(path)
-    @git_repo
   end
 
   def fqdn
