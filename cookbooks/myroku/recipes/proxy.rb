@@ -7,6 +7,11 @@
 # All rights reserved - Do Not Redistribute
 #
 
-link "/etc/nginx/sites-enabled/myroku" do
-  to "/etc/nginx/sites-available/myroku"
+directory "/etc/nginx/conf.d" do
+  action :delete
+  not_if { File.symlink? "/etc/nginx/conf.d" }
+end
+
+link "/etc/nginx/conf.d" do
+  to "/var/myroku/nginx/current"
 end

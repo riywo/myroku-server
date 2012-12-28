@@ -33,3 +33,8 @@ include_recipe "sudo"
 group "sudo" do
   members myroku_user
 end
+
+directory "/var/myroku" do
+  owner myroku_user
+  group myroku_user
+end

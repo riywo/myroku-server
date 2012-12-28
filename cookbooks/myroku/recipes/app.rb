@@ -7,3 +7,9 @@
 # All rights reserved - Do Not Redistribute
 #
 include_recipe 'myroku::ruby'
+myroku_user = node['myroku']['username']
+
+directory "/var/myroku/app" do
+  owner myroku_user
+  group myroku_user
+end
