@@ -56,7 +56,9 @@ namespace :foreman do
   end
 
   def local_supervisor_path
-    "/tmp/myroku/supervisor.d"
+    path = "/tmp/myroku_supervisor.d"
+    Dir.mkdir path unless File.exists? path
+    path
   end
 
   def envfile
@@ -70,7 +72,7 @@ namespace :foreman do
   end
 
   def logdir
-    "/var/log/myroku/#{application}"
+    "/var/log/myroku/app/#{application}"
   end
 
   def local_cache_path
