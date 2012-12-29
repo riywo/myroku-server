@@ -8,3 +8,4 @@ set(:repository)  { "git@localhost:#{application}" }
 set(:local_cache) { ".rsync_cache/#{application}" }
 set(:deploy_to)   { "/var/myroku/app/#{application}" }
 
+after "deploy", "llenv:deploy", "foreman:deploy"
