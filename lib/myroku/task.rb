@@ -40,7 +40,8 @@ namespace :foreman do
   task :deploy do
     from = "#{local_supervisor_path}/#{application}.conf"
     to   = "/etc/supervisor.d/#{application}.conf"
-    upload from, to, :hosts => app.host
+    upload from, from, :hosts => app.host
+    run "#{sudo} mv #{from} #{to}"
     run "mkdir -p #{logdir}"
   end
   before 'foreman:deploy', 'foreman:export'
