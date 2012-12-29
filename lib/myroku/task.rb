@@ -2,7 +2,14 @@ require 'myroku/config'
 require 'myroku/model'
 
 namespace :deploy do
-  task :cold do end
+  namespace :pending do
+    task :default do end
+    task :diff do end
+  end
+  namespace :rollback do
+    task :default do end
+    task :code do end
+  end
   task :migrate do end
   task :migrations do end
 end
