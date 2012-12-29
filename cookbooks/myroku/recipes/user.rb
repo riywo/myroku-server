@@ -39,7 +39,7 @@ directory "/var/myroku" do
   group myroku_user
 end
 
-directory "/tmp/myroku" do
+directory "/var/log/myroku" do
   owner myroku_user
   group myroku_user
 end

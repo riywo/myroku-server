@@ -23,8 +23,3 @@ execute "rbenv local #{node['myroku']['ruby_version']}" do
   cwd   myroku_home
   environment ({'HOME' => myroku_home})
 end
-
-gem_package "ruby-llenv" do
-  action :install
-end
-

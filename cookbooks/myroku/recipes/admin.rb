@@ -52,3 +52,7 @@ execute "git clone gitolite-admin" do
   not_if {File.exists? "#{myroku_home}/gitolite-admin"}
 end
 
+directory "/var/log/myroku" do
+  owner myroku_user
+  group myroku_user
+end
