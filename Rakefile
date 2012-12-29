@@ -6,11 +6,12 @@ desc "Create bundled llenv"
 task "llenv:create" do
   template = ERB.new <<-EOF
 #!/bin/bash
-unset `env | cut -f1 -d'=' | xargs`
+unset `env | cut -f1 -d'=' | grep -v 'PORT' | grep -v 'LLENV_ROOT' | xargs`
 <% ENV.each { |k,v| %>
 export <%= k %>="<%= v %>"<% } %>
 
-exec llenv $@
+args=`eval $@`
+exec llenv $args
   EOF
   File.write "llenv_bundled", template.result(binding)
   system "chmod +x llenv_bundled"

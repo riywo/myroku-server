@@ -43,12 +43,13 @@ namespace :foreman do
   task :deploy do
     from = "#{local_supervisor_path}/#{application}.conf"
     to   = "/etc/supervisor.d/#{application}.conf"
-    upload from, from, :hosts => app.host
-    run "#{sudo} mv #{from} #{to}"
+    temp = "/tmp/#{application}.conf"
+    upload from, temp, :hosts => app.host
+    run "#{sudo} mv #{temp} #{to}"
     run "mkdir -p #{logdir}"
   end
   before 'foreman:deploy', 'foreman:export'
-  after  'foreman:deploy', 'foreman:reload'
+#  after  'foreman:deploy', 'foreman:reload'
 
   desc "Reload supervisord"
   task :reload do

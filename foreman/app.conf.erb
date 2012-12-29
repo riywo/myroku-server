@@ -10,7 +10,7 @@ engine.each_process do |name, process|
     app_names << full_name
 %>
 [program:<%= full_name %>]
-command=llenv exec <%= process.command %>
+command=/var/myroku/bin/llenv exec <%= process.command %>
 autostart=true
 autorestart=true
 stopsignal=QUIT
