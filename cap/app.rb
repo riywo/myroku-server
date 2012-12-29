@@ -5,7 +5,7 @@ set :git_enable_submodules, true
 set :rsync_options, '-az --delete --delete-excluded --exclude=.git'
 set(:application) { config_name.split(':').last }
 set(:repository)  { "git@localhost:#{application}" }
-set(:local_cache) { ".rsync_cache/#{application}" }
+set(:local_cache) { ".rsync_cache/app/#{application}" }
 set(:deploy_to)   { "/var/myroku/app/#{application}" }
 
 after "deploy", "llenv:deploy", "foreman:deploy"
