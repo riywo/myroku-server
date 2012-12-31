@@ -19,4 +19,4 @@ directory "/var/log/myroku/app" do
   group myroku_user
 end
 
-include_recipe 'supervisor'
+include_recipe 'daemontools'
