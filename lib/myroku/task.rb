@@ -51,9 +51,6 @@ namespace :foreman do
   end
   before 'foreman:deploy', 'foreman:export'
 
-  end
-  before 'foreman:start', 'foreman:deploy'
-
   def local_temp_path
     path = "/tmp/myroku_daemontools_#{application}"
     Dir.mkdir path unless File.exists? path
