@@ -97,7 +97,8 @@ LLENV_ENV=PORT=#{app.port}
   end
 
   def rsync_command_for(server, from, to)
-    "rsync #{rsync_options} --exclude='supervise' --rsh='ssh -p #{ssh_port(server)}' #{from} #{rsync_host(server)}:#{to}"
+    options = '-az --delete'
+    "rsync #{options} --exclude='supervise' --rsh='ssh -p #{ssh_port(server)}' #{from} #{rsync_host(server)}:#{to}"
   end
 
   def ssh_port(server)

@@ -32,8 +32,10 @@ module Capistrano
         def restore_vendorpath
           vendorpath = llenv_vendorpath
           if vendorpath.split('/').size > 1
-            parent_dir = File.expand_path("../", vendorpath)
-            system("cd #{local_cache_path} && mkdir #{parent_dir}")
+            parent_dir = vendorpath.split('/')
+            parent_dir.pop
+            parent_dir = File.join parent_dir
+            system("cd #{local_cache_path} && mkdir -p #{parent_dir}")
           end
           system("cd #{local_cache_path} && mv #{escape_path} #{vendorpath}")
         end
