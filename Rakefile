@@ -5,13 +5,19 @@ $: << File.expand_path(File.dirname(__FILE__) + "/lib")
 desc "Create bundled llenv"
 task "llenv:create" do
   template = ERB.new <<-EOF
-#!/bin/bash
-unset `env | cut -f1 -d'=' | grep -v 'PORT' | grep -v 'LLENV_ROOT' | xargs`
-<% ENV.each { |k,v| %>
-export <%= k %>="<%= v %>"<% } %>
+#!/usr/bin/env perl
+use strict;
+use warnings;
 
-args=`eval $@`
-exec llenv $args
+for (keys %ENV) {
+  next if /^LLENV/;
+  delete $ENV{$_};
+}
+<% ENV.each { |k,v| %>
+$ENV{<%= k %>} = '<%= v %>';<% } %>
+
+unshift @ARGV, 'llenv';
+exec(@ARGV);
   EOF
   File.write "llenv_bundled", template.result(binding)
   system "chmod +x llenv_bundled"
