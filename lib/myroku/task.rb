@@ -51,8 +51,6 @@ namespace :foreman do
   end
   before 'foreman:deploy', 'foreman:export'
 
-  desc "Start procs"
-  task :start do
   end
   before 'foreman:start', 'foreman:deploy'
 
