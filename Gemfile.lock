@@ -1,3 +1,10 @@
+GIT
+  remote: https://github.com/riywo/foreman-export-daemontools.git
+  revision: 203f118cde3a1b239639a4204a07d931883dbb6b
+  specs:
+    foreman-export-daemontools (0.1.1)
+      foreman (>= 0.60.2)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -102,6 +109,7 @@ DEPENDENCIES
   capistrano-multiconfig
   capistrano_rsync_with_remote_cache
   foreman
+  foreman-export-daemontools!
   gitolite
   moneta (= 0.6.0)
   mysql2
