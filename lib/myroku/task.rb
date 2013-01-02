@@ -38,6 +38,7 @@ namespace :foreman do
     command << " -d #{app_path} -p #{app.port} -u myroku -t #{template}"
     run command, :hosts => app.host
     run "for dir in `#{proc_dirs}`; do #{sudo} ln -sf $dir /etc/service; done"
+    run "for dir in `#{proc_dirs}`; do #{sudo} svc -t $dir; done"
   end
 
   def proc_dirs
