@@ -63,7 +63,7 @@ namespace :foreman do
     file = "/tmp/myroku_#{application}_env"
     env = <<-EOF
 LLENV_ROOT=/var/myroku/.llenv
-LLENV_ENV=PORT=#{app.port}
+LLENV_ENV=PORT=#{app.port},USER=myroku
     EOF
     put env, file
     file
