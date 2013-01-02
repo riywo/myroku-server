@@ -48,8 +48,8 @@ execute "git clone gitolite-admin" do
   group myroku_user
   cwd myroku_home
   environment ({'HOME' => myroku_home})
-  command "git clone git@localhost:gitolite-admin"
-  not_if {File.exists? "#{myroku_home}/gitolite-admin"}
+  command "git clone git@localhost:gitolite-admin /var/myroku/gitolite-admin"
+  not_if {File.exists? "/var/myroku/gitolite-admin"}
 end
 
 directory "/var/log/myroku" do
