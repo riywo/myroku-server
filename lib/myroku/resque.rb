@@ -25,8 +25,8 @@ end
 
 class AppDeploy
   @queue = :app_deploy
-  def self.perform(app)
-    ARGV.replace(%W[app:#{app} deploy])
+  def self.perform(name)
+    ARGV.replace(%W[app:#{name} deploy])
     Capistrano::CLI.execute
   end
 end

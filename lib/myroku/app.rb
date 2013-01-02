@@ -32,6 +32,11 @@ class App < Sinatra::Base
     }.to_json
   end
 
+  post '/application/:name' do
+    app = Model::Application.find_by_name(params[:name])
+    Resque.enqueue(Myroku::Job::AppDeploy, app.name)
+  end
+
   post '/application' do
     app = Model::Application.create(params)
     redirect to("/application/#{app.id}")
