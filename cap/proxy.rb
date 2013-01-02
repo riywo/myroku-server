@@ -1,3 +1,5 @@
+role :proxy, *servers['proxy']
+
 namespace :deploy do
   task :default do
     update

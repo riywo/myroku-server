@@ -1,3 +1,5 @@
+role :app, *servers['app']
+
 set :scm, :git
 set :use_sudo, false
 set :deploy_via, :rsync_simply
@@ -8,7 +10,7 @@ set :deploy_to, "/var/myroku/#{application}"
 after "deploy", "env:deploy", "llenv:deploy", "foreman:export"
 
 namespace :env do
-  task :deploy, :roles => [:admin, :app] do
+  task :deploy do
     upload ".env_exported", "/var/myroku/bin/env"
     run "chmod +x /var/myroku/bin/env"
   end

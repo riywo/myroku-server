@@ -1,3 +1,5 @@
+role :app, *servers['app']
+
 set :scm, :git
 set :use_sudo, false
 set :deploy_via, :rsync_with_remote_cache_llenv
