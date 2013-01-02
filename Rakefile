@@ -1,6 +1,14 @@
 $: << File.expand_path(File.dirname(__FILE__) + "/lib")
 #require 'bundler'
 #Bundler.require
+require 'myroku/model'
+
+desc "Create application manually (name=NAME subdomain=SUBDOMAIN)"
+task "app:create" do
+  name      = ENV['name']
+  subdomain = ENV['subdomain']
+  Myroku::Model::Application.create(:name => name, :subdomain => subdomain)
+end
 
 desc "Create exported env"
 task "env:create" do

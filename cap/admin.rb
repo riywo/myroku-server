@@ -5,7 +5,7 @@ set :rsync_options, '-az --delete --delete-excluded'
 set :application, 'myroku-server'
 set :deploy_to, "/var/myroku/#{application}"
 
-after "deploy", "env:deploy", "foreman:deploy"
+after "deploy", "env:deploy", "llenv:deploy", "foreman:export"
 
 namespace :env do
   task :deploy, :roles => [:admin, :app] do

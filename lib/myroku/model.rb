@@ -14,7 +14,7 @@ class Application < ActiveRecord::Base
 
   def initialize(attributes = nil, options = {})
     name = attributes[:name]
-    subdomain = name
+    subdomain = attributes[:subdomain] || name
     super({:name => name, :subdomain => subdomain}, options)
 
     build_app_server(:name => name)
@@ -23,8 +23,10 @@ class Application < ActiveRecord::Base
 
   def save
     super
-    update_ga_repo
-    create_cap_file
+    if name != 'myroku-server'
+      update_ga_repo
+      create_cap_file
+    end
   end
 
   def update_ga_repo
@@ -41,7 +43,7 @@ class Application < ActiveRecord::Base
   end
 
   def ga_repo
-    @ga_repo ||= Gitolite::GitoliteAdmin.new(File.expand_path("../../../../gitolite-admin", __FILE__))
+    @ga_repo ||= Gitolite::GitoliteAdmin.new(config.common['gitolite_admin'])
     @ga_repo
   end
 
@@ -123,7 +125,7 @@ class DbServer < ActiveRecord::Base
 end
 
 class User < ActiveRecord::Base
-  @@ga_repo = Gitolite::GitoliteAdmin.new(File.expand_path("../../../../gitolite-admin", __FILE__))
+  @@ga_repo = Gitolite::GitoliteAdmin.new(Myroku::Config.new.common['gitolite_admin'])
 
   def self.post(params)
     user = find_or_initialize_by_email(params[:email])
