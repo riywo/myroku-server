@@ -12,4 +12,4 @@ config/*.yml
 !.gitkeep
 .rsync_cache/
 cap/app/*
-llenv_bundled
+.bundle_exported

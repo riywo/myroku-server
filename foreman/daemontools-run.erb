@@ -5,5 +5,5 @@ exec \
     sh -c 'cd <%= engine.root %> && \
       exec \
       setuidgid <%= user %> \
-      /var/myroku/bin/llenv exec <%= process.command %>
+      /var/myroku/bin/bundle exec llenv exec <%= process.command %>
     '

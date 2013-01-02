@@ -2,8 +2,17 @@ $: << File.expand_path(File.dirname(__FILE__) + "/lib")
 #require 'bundler'
 #Bundler.require
 
-desc "Create bundled llenv"
+desc "Create exported llenv"
 task "llenv:create" do
+  export_bin('llenv')
+end
+
+desc "Create exported bundle"
+task "bundle:create" do
+  export_bin('bundle')
+end
+
+def export_bin(bin)
   template = ERB.new <<-EOF
 #!/usr/bin/env perl
 use strict;
@@ -16,15 +25,15 @@ for (keys %ENV) {
 <% ENV.each { |k,v| %>
 $ENV{<%= k %>} = '<%= v %>';<% } %>
 
-unshift @ARGV, 'llenv';
+unshift @ARGV, '<%= bin %>';
 exec(@ARGV);
   EOF
-  File.write "llenv_bundled", template.result(binding)
-  system "chmod +x llenv_bundled"
+  File.write ".#{bin}_exported", template.result(binding)
+  system "chmod +x .#{bin}_exported"
 end
 
 require 'resque/tasks'
-require 'myroku/worker'
+require 'myroku/resque'
 
 task "resque:setup" do
   ENV['QUEUE'] = '*'

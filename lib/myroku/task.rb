@@ -33,34 +33,15 @@ end
 namespace :foreman do
   desc "Export Procfile"
   task :export do
-    command =  "foreman export daemontools #{local_temp_path}"
+    command =  "/var/myroku/bin/bundle exec foreman export daemontools /var/myroku/service"
     command << " -f #{procfile} -e #{envfile} -a #{application}"
-    command << " -d #{app_path} -p #{app.port} -u myroku -t foreman"
-    run_locally command
-  end
-
-  desc "Deploy exported files"
-  task :deploy do
-    proc_dirs.each do |dir|
-      from = "#{local_temp_path}/#{dir}/"
-      to   = "/var/myroku/service/#{dir}"
-      finder_options = {:except => { :no_release => true }}
-      find_servers(finder_options).each {|s| run_locally(rsync_command_for(s, from, to)) }
-      run "#{sudo} ln -fs #{to} /etc/service/"
-    end
-  end
-  before 'foreman:deploy', 'foreman:export'
-
-  def local_temp_path
-    path = "/tmp/myroku_daemontools_#{application}"
-    Dir.mkdir path unless File.exists? path
-    path
+    command << " -d #{app_path} -p #{app.port} -u myroku -t #{template}"
+    run command, :hosts => app.host
+    run "for dir in `#{proc_dirs}`; do #{sudo} ln -sf $dir /etc/service; done"
   end
 
   def proc_dirs
-    Dir.glob("#{local_temp_path}/*/").map do |dir|
-      File.basename dir
-    end
+    "echo /var/myroku/service/#{application}-*/"
   end
 
   def app
@@ -68,7 +49,7 @@ namespace :foreman do
   end
 
   def app_path
-    "/var/myroku/app/#{application}/current"
+    "#{deploy_to}/current"
   end
 
   def envfile
@@ -91,17 +72,7 @@ LLENV_ENV=PORT=#{app.port}
     File.join(app_path, "Procfile")
   end
 
-  def rsync_command_for(server, from, to)
-    options = '-az --delete'
-    "rsync #{options} --exclude='supervise' --rsh='ssh -p #{ssh_port(server)}' #{from} #{rsync_host(server)}:#{to}"
+  def template
+    "/var/myroku/myroku-server/foreman"
   end
-
-  def ssh_port(server)
-    server.port || ssh_options[:port] || 22
-  end
-
-  def rsync_host(server)
-    respond_to?(:user) ? "#{user}@#{server.host}" : server.host
-  end
-
 end
