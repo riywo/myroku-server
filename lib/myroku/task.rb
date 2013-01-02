@@ -33,7 +33,7 @@ end
 namespace :foreman do
   desc "Export Procfile"
   task :export do
-    command =  "/var/myroku/bin/bundle exec foreman export daemontools /var/myroku/service"
+    command =  "/var/myroku/bin/env bundle exec foreman export daemontools /var/myroku/service"
     command << " -f #{procfile} -e #{envfile} -a #{application}"
     command << " -d #{app_path} -p #{app.port} -u myroku -t #{template}"
     run command, :hosts => app.host
@@ -73,6 +73,6 @@ LLENV_ENV=PORT=#{app.port}
   end
 
   def template
-    "/var/myroku/myroku-server/foreman"
+    "/var/myroku/myroku-server/current/foreman"
   end
 end
