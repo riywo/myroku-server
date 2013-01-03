@@ -1,4 +1,0 @@
-# This file is managed by Chef for <%= node['fqdn'] %>
-# Do NOT modify this file directly.
-
-<%= @sudoer %>  <%= @host %>=(<%= @runas %>) <%= 'NOPASSWD:' if @nopasswd %><%= @commands.join(' ') %>
