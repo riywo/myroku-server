@@ -13,4 +13,3 @@ config/*.yml
 .rsync_cache/
 cap/app/*
 .env_exported
-chef/vendor
