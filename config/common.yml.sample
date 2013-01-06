@@ -1,3 +1,2 @@
 app_domain: example.local
 admin_domain: example.local
-gitolite_admin: /var/myroku/gitolite-admin

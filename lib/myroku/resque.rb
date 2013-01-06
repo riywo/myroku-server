@@ -2,7 +2,7 @@ require 'resque'
 require 'myroku/config'
 require 'capistrano/cli'
 
-Resque.redis = Myroku::Config.new.redis_url
+Resque.redis = ENV['REDIS_URL']
 
 module Myroku
 module Job

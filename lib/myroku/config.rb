@@ -12,14 +12,6 @@ class Config
     config[key.to_s]
   end
 
-  def redis_url
-    conf = database['redis']
-    url = "redis://#{conf['host']}"
-    url = url + ":#{conf['port']}"
-    url = url + "/#{conf['db']}"
-    url
-  end
-
   private
 
   def config

@@ -2,8 +2,7 @@ require 'active_record'
 require 'myroku/config'
 require 'gitolite'
 
-ActiveRecord::Base.establish_connection(Myroku::Config.new.database['mysql'])
-ActiveRecord::Migrator.up('db/migrate')
+ActiveRecord::Base.establish_connection(ENV['DATABASE_URL'])
 
 module Myroku
 module Model
@@ -43,7 +42,7 @@ class Application < ActiveRecord::Base
   end
 
   def ga_repo
-    @ga_repo ||= Gitolite::GitoliteAdmin.new(config.common['gitolite_admin'])
+    @ga_repo ||= Gitolite::GitoliteAdmin.new('/var/myroku/gitolite-admin')
     @ga_repo
   end
 
@@ -125,7 +124,7 @@ class DbServer < ActiveRecord::Base
 end
 
 class User < ActiveRecord::Base
-  @@ga_repo = Gitolite::GitoliteAdmin.new(Myroku::Config.new.common['gitolite_admin'])
+  @@ga_repo = Gitolite::GitoliteAdmin.new('/var/myroku/gitolite-admin')
 
   def self.post(params)
     user = find_or_initialize_by_email(params[:email])

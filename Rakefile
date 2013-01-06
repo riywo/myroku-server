@@ -3,6 +3,16 @@ $: << File.expand_path(File.dirname(__FILE__) + "/lib")
 #Bundler.require
 require 'myroku/model'
 
+namespace :db do
+  desc "migrate your database"
+  task :migrate do
+    ActiveRecord::Migrator.migrate(
+      'db/migrate',
+      ENV["VERSION"] ? ENV["VERSION"].to_i : nil
+    )
+  end
+end
+
 desc "Create application manually (name=NAME subdomain=SUBDOMAIN)"
 task "app:create" do
   name      = ENV['name']
