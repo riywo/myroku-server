@@ -35,6 +35,13 @@ export MYROKU_ADMIN_URL=http://#{admin_host}:#{admin_port}
   end
 end
 
+task "cap:create" do
+  apps = Myroku::Model::Application.where("name != 'myroku-server'")
+  apps.each do |app|
+    File.write("./cap/app/#{app.name}.rb", "")
+  end
+end
+
 require 'resque/tasks'
 task "resque:setup" do
   ENV['QUEUE'] = '*'

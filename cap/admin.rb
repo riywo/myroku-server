@@ -11,11 +11,17 @@ set :local_cache, "/var/myroku/cache/#{application}"
 set :deploy_to, "/var/myroku/#{application}"
 set :git_enable_submodules, true
 
-after "deploy", "env:deploy", "config:deploy", "triggerenv:deploy", "foreman:export"
+after "deploy", "env:deploy", "cap:create", "config:deploy", "triggerenv:deploy", "foreman:export"
 
 namespace :env do
   task :deploy do
     upload ".env", "#{deploy_to}/current/.env"
+  end
+end
+
+namespace :cap do
+  task :create do
+    run "cd #{deploy_to}/current && llenv exec foreman run rake cap:create"
   end
 end
 
