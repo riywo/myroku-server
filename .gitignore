@@ -14,3 +14,4 @@ config/*.yml
 cap/app/*
 .env_exported
 .env
+.ruby-version

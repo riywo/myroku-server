@@ -16,8 +16,8 @@ class Application < ActiveRecord::Base
     subdomain = attributes[:subdomain] || name
     super({:name => name, :subdomain => subdomain}, options)
 
-    build_app_server(:name => name)
-    build_db_server(:name => name)
+    build_app_server(:name => name, :host => attributes[:app_host], :port => attributes[:app_port])
+    build_db_server(:name => name, :host => attributes[:db_host])
   end
 
   def save
@@ -78,8 +78,8 @@ class AppServer < ActiveRecord::Base
   belongs_to :applications
 
   def initialize(attributes = nil, options = {})
-    host = Myroku::Config.new.servers['app'].sample
-    port = free_port(host)
+    host = attributes[:host] || Myroku::Config.new.servers['app'].sample
+    port = attributes[:port] || free_port(host)
     super({:host => host, :port => port}, options)
   end
 
@@ -97,7 +97,7 @@ class DbServer < ActiveRecord::Base
   belongs_to :applications
 
   def initialize(attributes = nil, options = {})
-    host = Myroku::Config.new.servers['db'].sample
+    host = attributes[:host] || Myroku::Config.new.servers['db'].sample
     mysql_db = escape_mysql_db(attributes[:name])
     mongo_db = escape_mongo_db(attributes[:name])
     redis_db = define_redis_db(attributes[:name])
@@ -106,7 +106,7 @@ class DbServer < ActiveRecord::Base
   end
 
   def escape_mysql_db(name)
-    name
+    "myroku_#{name}"
   end
 
   def escape_mongo_db(name)

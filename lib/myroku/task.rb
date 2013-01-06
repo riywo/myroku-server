@@ -1,5 +1,6 @@
 require 'myroku/config'
 require 'myroku/model'
+require 'foreman/env'
 
 namespace :deploy do
   namespace :pending do
@@ -18,7 +19,7 @@ namespace :llenv do
   end
 
   def llenv_rsync_command_for(server)
-    "rsync #{rsync_options} --rsh='ssh -p #{ssh_port(server)}' /home/myroku/.llenv/ #{rsync_host(server)}:/var/myroku/.llenv/"
+    "rsync -az --delete --rsh='ssh -p #{ssh_port(server)}' /home/myroku/.llenv/ #{rsync_host(server)}:/var/myroku/.llenv/"
   end
 
   def ssh_port(server)
@@ -33,7 +34,7 @@ end
 namespace :foreman do
   desc "Export Procfile"
   task :export do
-    command =  "/var/myroku/bin/env bundle exec foreman export daemontools /var/myroku/service"
+    command =  "cd /var/myroku/myroku-server/current && llenv exec foreman export daemontools /var/myroku/service"
     command << " -f #{procfile} -e #{envfile} -a #{application}"
     command << " -d #{app_path} -p #{app.port} -u myroku -t #{template}"
     run command, :hosts => app.host
@@ -54,19 +55,37 @@ namespace :foreman do
   end
 
   def envfile
-    files = [tmp_envfile]
-    files << File.join(app_path, ".env") if File.exists? File.join(app_path, ".env")
-    files.join(',')
+    file = "/tmp/myroku_#{application}_env"
+    myroku_env = {
+      'PORT' => app.port,
+      'USER' => 'myroku'
+    }
+    env = local_env
+    env['LLENV_ROOT'] = '/var/myroku/.llenv'
+    env['LLENV_ENV'] = llenv_env(local_env.merge(myroku_env))
+    entries = []
+    env.each do |k, v|
+      entries << "#{k}=#{v}"
+    end
+    put entries.join("\n"), file
+    file
   end
 
-  def tmp_envfile
-    file = "/tmp/myroku_#{application}_env"
-    env = <<-EOF
-LLENV_ROOT=/var/myroku/.llenv
-LLENV_ENV=PORT=#{app.port},USER=myroku
-    EOF
-    put env, file
-    file
+  def llenv_env(hash)
+    entries = []
+    hash.each do |k, v|
+      entries << "#{k}=#{v}"
+    end
+    entries.join(',')
+  end
+
+  def local_env
+    env = {}
+    file = File.join(app_path, ".env")
+    Foreman::Env.new(file).entries do |k, v|
+      env[k] = v
+    end
+    env
   end
 
   def procfile

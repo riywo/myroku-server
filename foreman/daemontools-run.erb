@@ -2,8 +2,8 @@
 exec 2>&1
 exec \
   envdir ./env \
-    sh -c 'cd <%= engine.root %> && \
+    bash -l -c 'cd <%= engine.root %> && \
       exec \
       setuidgid <%= user %> \
-      /var/myroku/bin/env bundle exec llenv exec <%= process.command %>
+      llenv exec <%= process.command %>
     '
