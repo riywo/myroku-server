@@ -65,7 +65,7 @@ namespace :foreman do
     env['LLENV_ENV'] = llenv_env(local_env.merge(myroku_env))
     entries = []
     env.each do |k, v|
-      entries << "#{k}=#{v}"
+      entries << "#{k}='#{v}'"
     end
     put entries.join("\n"), file
     file
@@ -74,7 +74,7 @@ namespace :foreman do
   def llenv_env(hash)
     entries = []
     hash.each do |k, v|
-      entries << "#{k}=#{v}"
+      entries << "#{k}='#{v}'"
     end
     entries.join(',')
   end
