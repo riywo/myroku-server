@@ -101,7 +101,7 @@ class DbServer < ActiveRecord::Base
     host = attributes[:host] || Myroku::Config.new.servers['db'].sample
     mysql_db = escape_mysql_db(attributes[:name])
     mongo_db = escape_mongo_db(attributes[:name])
-    redis_db = attributes.has_key? :redis_db ? attributes[:redis_db] : define_redis_db(attributes[:name])
+    redis_db = attributes[:redis_db].nil? ? define_redis_db(attributes[:name]) : attributes[:redis_db]
 
     super({:host => host, :mysql_db => mysql_db, :mongo_db => mongo_db, :redis_db => redis_db}, options)
   end
