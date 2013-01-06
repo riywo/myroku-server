@@ -11,7 +11,7 @@ set :local_cache, "/var/myroku/cache/#{application}"
 set :deploy_to, "/var/myroku/#{application}"
 set :git_enable_submodules, true
 
-after "deploy", "env:deploy", "llenv:deploy", "config:deploy", "cap:deploy", "foreman:export"
+after "deploy", "env:deploy", "llenv:deploy", "config:deploy", "cap:deploy", "triggerenv:deploy", "foreman:export"
 
 namespace :env do
   task :deploy do
@@ -36,3 +36,10 @@ namespace :cap do
     end
   end
 end
+
+namespace :triggerenv do
+  task :deploy do
+    upload "triggers/.envrc", "#{deploy_to}/current/triggers/.envrc"
+  end
+end
+
