@@ -50,18 +50,18 @@ namespace :foreman do
     Myroku::Model::Application.find_by_name(application).app_server
   end
 
+  def db
+    Myroku::Model::Application.find_by_name(application).db_server
+  end
+
   def app_path
     "#{deploy_to}/current"
   end
 
   def envfile
     file = "/tmp/myroku_#{application}_env"
-    myroku_env = {
-      'PORT' => app.port,
-      'USER' => 'myroku'
-    }
-    env = local_env.merge(app_env)
-    env['LLENV_ENV'] = llenv_env(env.merge(myroku_env))
+    env = myroku_env.merge(local_env).merge(app_env)
+    env['LLENV_ENV'] = llenv_env(env)
     env['LLENV_ROOT'] = '/var/myroku/.llenv'
     entries = []
     env.each do |k, v|
@@ -77,6 +77,18 @@ namespace :foreman do
       entries << "#{k}=#{v}"
     end
     entries.join(',')
+  end
+
+  def myroku_env
+    env = {
+      'PORT' => app.port,
+      'USER' => 'myroku',
+    }
+    user = ActiveRecord::Base.configurations['username']
+    password = ActiveRecord::Base.configurations['password']
+    env['DATABASE_URL'] = "mysql2://#{user}:#{password}@#{db.host}/#{db.mysql_db}"
+    env['REDIS_URL'] = "redis://#{db.host}/#{db.redis_db}"
+    env
   end
 
   def local_env
