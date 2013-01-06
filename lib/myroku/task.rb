@@ -60,9 +60,9 @@ namespace :foreman do
       'PORT' => app.port,
       'USER' => 'myroku'
     }
-    env = local_env
+    env = local_env.merge(app_env)
+    env['LLENV_ENV'] = llenv_env(env.merge(myroku_env))
     env['LLENV_ROOT'] = '/var/myroku/.llenv'
-    env['LLENV_ENV'] = llenv_env(local_env.merge(app_env).merge(myroku_env))
     entries = []
     env.each do |k, v|
       entries << "#{k}=#{v}"
@@ -89,7 +89,11 @@ namespace :foreman do
   end
 
   def app_env
-    Myroku::Model::Application.find_by_name(application).environment
+    env = {}
+    Myroku::Model::Application.find_by_name(application).environments.each do |row|
+      env[row.key] = row.value
+    end
+    env
   end
 
   def procfile
