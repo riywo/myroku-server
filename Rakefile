@@ -2,6 +2,8 @@ $: << File.expand_path(File.dirname(__FILE__) + "/lib")
 #require 'bundler'
 #Bundler.require
 require 'myroku/model'
+require 'myroku/config'
+require 'myroku/resque'
 
 namespace :db do
   desc "migrate your database"
@@ -13,20 +15,27 @@ namespace :db do
   end
 end
 
-desc "Create application manually (name=NAME subdomain=SUBDOMAIN app_host=APP_HOST app_port=APP_PORT db_host=DB_HOST redis_db=REDIS_DB)"
-task "app:create" do
-  name      = ENV['name']
-  subdomain = ENV['subdomain']
-  app_host  = ENV['app_host']
-  app_port  = ENV['app_port']
-  db_host   = ENV['db_host']
-  redis_db  = ENV['redis_db']
-  Myroku::Model::Application.create(:name => name, :subdomain => subdomain, :app_host => app_host, :app_port => app_port, :db_host => db_host, :redis_db => redis_db)
+desc "Create admin application"
+task "admin:create" do
+  admin_host = Myroku::Config.new.servers['admin']
+  admin_port = Myroku::Config.new.common['admin_port']
+  unless Myroku::Model::Application.exists?(:name => 'myroku-server')
+    Myroku::Model::Application.create(
+      :name      => 'myroku-server',
+      :subdomain => 'www',
+      :app_host  => admin_host,
+      :app_port  => admin_port,
+      :db_host   => admin_host,
+      :redis_db  => 0
+    )
+    File.write(File.expand_path('../triggers/.envrc', __FILE__), <<-EOF)
+export MYROKU_ADMIN_URL=http://#{admin_host}:#{admin_port}
+    EOF
+    Resque.enqueue(Myroku::Job::ProxyDeploy)
+  end
 end
 
 require 'resque/tasks'
-require 'myroku/resque'
-
 task "resque:setup" do
   ENV['QUEUE'] = '*'
   ENV['TERM_CHILD'] = "1"

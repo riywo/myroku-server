@@ -8,8 +8,8 @@ module Myroku
 module Model
 
 class Application < ActiveRecord::Base
-  has_one :app_server, :autosave => true
-  has_one :db_server,  :autosave => true
+  has_one :app_server, :autosave => true, :dependent => :destroy
+  has_one :db_server,  :autosave => true, :dependent => :destroy
   has_many :environments
 
   def initialize(attributes = nil, options = {})

@@ -94,8 +94,10 @@ namespace :foreman do
   def local_env
     env = {}
     file = File.join(app_path, ".env")
-    Foreman::Env.new(file).entries do |k, v|
-      env[k] = v
+    if File.exists? file
+      Foreman::Env.new(file).entries do |k, v|
+        env[k] = v
+      end
     end
     env
   end

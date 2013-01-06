@@ -8,10 +8,8 @@
 .bundle/
 vendor/bundle/
 config/*.yml
-.ssh/
 !.gitkeep
-.rsync_cache/
 cap/app/*
-.env_exported
 .env
 .ruby-version
+triggers/.envrc

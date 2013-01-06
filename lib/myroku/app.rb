@@ -17,11 +17,12 @@ class App < Sinatra::Base
       :app  => Model::Application.all,
       :app_servers => Model::AppServer.all,
       :db_servers => Model::DbServer.all,
+      :environments => Model::Environment.all,
     }.to_json
   end
 
-  get '/application/:id' do
-    app = Model::Application.find(params[:id])
+  get '/application/:name' do
+    app = Model::Application.find_by_name(params[:name])
     {
       :name    => app.name,
       :url     => app.url,
@@ -39,7 +40,8 @@ class App < Sinatra::Base
 
   post '/application' do
     app = Model::Application.create(params)
-    redirect to("/application/#{app.id}")
+    Resque.enqueue(Myroku::Job::ProxyDeploy)
+    redirect to("/application/#{app.name}")
   end
 
   post '/user' do
