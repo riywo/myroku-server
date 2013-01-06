@@ -45,7 +45,9 @@ class App < Sinatra::Base
   end
 
   post '/user' do
-    Model::User.post(params).to_json
+    user = Model::User.post(params)
+    Resque.enqueue(Myroku::Job::UserCreate, user.pubkey, user.email)
+    user.to_json
   end
 
 end

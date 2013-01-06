@@ -129,19 +129,11 @@ class Environment < ActiveRecord::Base
 end
 
 class User < ActiveRecord::Base
-  @@ga_repo = Gitolite::GitoliteAdmin.new('/var/myroku/gitolite-admin')
-
   def self.post(params)
     user = find_or_initialize_by_email(params[:email])
     pubkey = params[:pubkey][:tempfile]
     user.pubkey = pubkey.read.chomp
     user.save
-
-    @@ga_repo.update
-    key = Gitolite::SSHKey.from_string(user.pubkey, user.email)
-    @@ga_repo.add_key key
-    @@ga_repo.save_and_apply
-
     user
   end
 end
