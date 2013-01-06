@@ -62,7 +62,7 @@ namespace :foreman do
     }
     env = local_env
     env['LLENV_ROOT'] = '/var/myroku/.llenv'
-    env['LLENV_ENV'] = llenv_env(local_env.merge(myroku_env))
+    env['LLENV_ENV'] = llenv_env(local_env.merge(app_env).merge(myroku_env))
     entries = []
     env.each do |k, v|
       entries << "#{k}=#{v}"
@@ -86,6 +86,10 @@ namespace :foreman do
       env[k] = v
     end
     env
+  end
+
+  def app_env
+    Myroku::Model::Application.find_by_name(application).environment
   end
 
   def procfile

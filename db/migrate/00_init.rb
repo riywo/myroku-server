@@ -28,6 +28,13 @@ class Init < ActiveRecord::Migration
     add_index  :db_servers, :mongo_db, :unique => true
     add_index  :db_servers, :redis_db, :unique => true
 
+    create_table :environments do |t|
+      t.integer :application_id, :null => false
+      t.string  :key,            :null => false
+      t.string  :value,          :null => false
+    end
+    add_index  :environments, [:application_id, :key], :unique => true
+
     create_table :users do |t|
       t.string  :email,    :null => false
       t.string  :pubkey,   :null => false

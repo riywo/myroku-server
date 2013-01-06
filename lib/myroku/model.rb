@@ -10,6 +10,7 @@ module Model
 class Application < ActiveRecord::Base
   has_one :app_server, :autosave => true
   has_one :db_server,  :autosave => true
+  has_many :environments
 
   def initialize(attributes = nil, options = {})
     name = attributes[:name]
@@ -17,7 +18,7 @@ class Application < ActiveRecord::Base
     super({:name => name, :subdomain => subdomain}, options)
 
     build_app_server(:name => name, :host => attributes[:app_host], :port => attributes[:app_port])
-    build_db_server(:name => name, :host => attributes[:db_host])
+    build_db_server(:name => name, :host => attributes[:db_host], :redis_db => attributes[:redis_db])
   end
 
   def save
@@ -100,7 +101,7 @@ class DbServer < ActiveRecord::Base
     host = attributes[:host] || Myroku::Config.new.servers['db'].sample
     mysql_db = escape_mysql_db(attributes[:name])
     mongo_db = escape_mongo_db(attributes[:name])
-    redis_db = define_redis_db(attributes[:name])
+    redis_db = attributes.has_key? :redis_db ? attributes[:redis_db] : define_redis_db(attributes[:name])
 
     super({:host => host, :mysql_db => mysql_db, :mongo_db => mongo_db, :redis_db => redis_db}, options)
   end
@@ -121,6 +122,10 @@ class DbServer < ActiveRecord::Base
     db
   end
 
+end
+
+class Environment < ActiveRecord::Base
+  belongs_to :applications
 end
 
 class User < ActiveRecord::Base
