@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/riywo/foreman-export-daemontools.git
-  revision: d2ba717cc12938293be8866d61bcf9d5aab21a88
+  revision: bea96c36506bcf4276d4f20212646f97fc6673a6
   specs:
     foreman-export-daemontools (0.1.1)
       foreman (>= 0.60.2)
